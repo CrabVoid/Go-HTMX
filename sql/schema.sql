@@ -1,3 +1,10 @@
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE companies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
@@ -9,6 +16,7 @@ CREATE TABLE companies (
 CREATE TABLE positions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     location TEXT,
     work_mode TEXT NOT NULL, -- Remote, Hybrid, Onsite
@@ -31,6 +39,7 @@ CREATE TABLE position_skills (
 CREATE TABLE applications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     position_id UUID NOT NULL REFERENCES positions(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status TEXT NOT NULL, -- Pending, Applied, Interviewing, Rejected, Offer, Ghosted
     source TEXT,
     applied_at TIMESTAMP NOT NULL DEFAULT NOW(),

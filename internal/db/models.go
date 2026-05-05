@@ -6,6 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type User struct {
+	ID           uuid.UUID
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
+}
+
 type Company struct {
 	ID        uuid.UUID
 	Name      string
@@ -17,6 +24,7 @@ type Company struct {
 type Position struct {
 	ID          uuid.UUID
 	CompanyID   uuid.UUID
+	UserID      uuid.UUID
 	Title       string
 	Location    *string
 	WorkMode    string
@@ -30,15 +38,15 @@ type Skill struct {
 	Name string
 }
 
-type PositionWithDetails struct {
-	Position
-	CompanyName string
-	Skills      []Skill
+type PositionSkill struct {
+	PositionID uuid.UUID
+	SkillID    uuid.UUID
 }
 
 type Application struct {
 	ID         uuid.UUID
 	PositionID uuid.UUID
+	UserID     uuid.UUID
 	Status     string
 	Source     *string
 	AppliedAt  time.Time
@@ -54,9 +62,26 @@ type Interview struct {
 	Feedback      *string
 }
 
+type Contact struct {
+	ID          uuid.UUID
+	CompanyID   uuid.UUID
+	Name        string
+	Role        *string
+	Email       *string
+	LinkedinURL *string
+}
+
+// Custom types for joined queries
+type PositionWithDetails struct {
+	Position
+	CompanyName string
+	Skills      []Skill
+}
+
 type ApplicationWithDetails struct {
 	Application
 	PositionTitle string
 	CompanyName   string
+	CompanyID     uuid.UUID
 	Interviews    []Interview
 }

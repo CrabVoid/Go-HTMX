@@ -39,6 +39,7 @@ func main() {
 	defer pool.Close()
 
 	queries := db.New(pool)
+	authHandler := handlers.NewAuthHandler(queries)
 	companyHandler := handlers.NewCompanyHandler(queries)
 	positionHandler := handlers.NewPositionHandler(queries)
 	applicationHandler := handlers.NewApplicationHandler(queries)
@@ -51,18 +52,39 @@ func main() {
 	fs := http.FileServer(http.Dir("static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		component := components.Dashboard()
-		err := component.Render(r.Context(), w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+	// Public routes
+	r.Get("/login", authHandler.GetLogin)
+	r.Post("/login", authHandler.PostLogin)
+	r.Get("/register", authHandler.GetRegister)
+	r.Post("/register", authHandler.PostRegister)
+	r.Post("/logout", authHandler.PostLogout)
+
+	// Protected routes
+	r.Group(func(r chi.Router) {
+		r.Use(handlers.AuthMiddleware)
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			component := components.Dashboard()
+			err := component.Render(r.Context(), w)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		})
+		r.Get("/companies", companyHandler.ListCompanies)
+		r.Post("/companies", companyHandler.CreateCompany)
+		r.Get("/companies/{id}/edit", companyHandler.GetCompanyForm)
+		r.Get("/companies/{id}/card", companyHandler.GetCompanyCard)
+		r.Put("/companies/{id}", companyHandler.UpdateCompany)
+		r.Delete("/companies/{id}", companyHandler.DeleteCompany)
+		r.Get("/positions", positionHandler.ListPositions)
+		r.Post("/positions", positionHandler.CreatePosition)
+		r.Delete("/positions/{id}", positionHandler.DeletePosition)
+		r.Get("/applications", applicationHandler.ListApplications)
+		r.Post("/applications", applicationHandler.CreateApplication)
+		r.Get("/applications/{id}", applicationHandler.GetApplication)
+		r.Delete("/applications/{id}", applicationHandler.DeleteApplication)
+		r.Post("/applications/{id}/interviews", applicationHandler.CreateInterview)
 	})
-	r.Get("/companies", companyHandler.ListCompanies)
-	r.Post("/companies", companyHandler.CreateCompany)
-	r.Get("/positions", positionHandler.ListPositions)
-	r.Get("/applications/{id}", applicationHandler.GetApplication)
-	r.Post("/applications/{id}/interviews", applicationHandler.CreateInterview)
 
 	fmt.Printf("Server starting on :%s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))

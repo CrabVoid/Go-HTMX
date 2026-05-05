@@ -14,10 +14,15 @@ templ Layout(title string) {
 			<nav class="bg-blue-600 text-white p-4 shadow-md">
 				<div class="container mx-auto flex justify-between items-center">
 					<h1 class="text-xl font-bold">Internship Manager</h1>
-					<div class="space-x-4">
+					<div class="space-x-4 flex items-center">
 						<a href="/" class="hover:underline">Dashboard</a>
 						<a href="/companies" class="hover:underline">Companies</a>
 						<a href="/positions" class="hover:underline">Positions</a>
+						<form action="/logout" method="POST" class="inline">
+							<button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold">
+								Logout
+							</button>
+						</form>
 					</div>
 				</div>
 			</nav>
