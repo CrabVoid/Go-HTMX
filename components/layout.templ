@@ -1,0 +1,29 @@
+package components
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } - Internship Manager</title>
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+			<link rel="stylesheet" href="/static/css/styles.css"/>
+		</head>
+		<body class="bg-gray-100 font-sans">
+			<nav class="bg-blue-600 text-white p-4 shadow-md">
+				<div class="container mx-auto flex justify-between items-center">
+					<h1 class="text-xl font-bold">Internship Manager</h1>
+					<div class="space-x-4">
+						<a href="/" class="hover:underline">Dashboard</a>
+						<a href="/companies" class="hover:underline">Companies</a>
+						<a href="/positions" class="hover:underline">Positions</a>
+					</div>
+				</div>
+			</nav>
+			<main class="container mx-auto p-6">
+				{ children... }
+			</main>
+		</body>
+	</html>
+}

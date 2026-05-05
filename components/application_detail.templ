@@ -1,0 +1,104 @@
+package components
+
+import (
+	"internship-manager/internal/db"
+	"fmt"
+	"github.com/google/uuid"
+)
+
+templ ApplicationDetail(app db.ApplicationWithDetails) {
+	@Layout(fmt.Sprintf("Application - %s", app.PositionTitle)) {
+		<div class="mb-6">
+			<a href="/positions" class="text-blue-600 hover:underline">← Back to Positions</a>
+		</div>
+
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+			<div class="lg:col-span-2">
+				<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+					<div class="flex justify-between items-start mb-4">
+						<div>
+							<h2 class="text-3xl font-bold">{ app.PositionTitle }</h2>
+							<p class="text-xl text-gray-600">{ app.CompanyName }</p>
+						</div>
+						<span class="bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full uppercase">
+							{ app.Status }
+						</span>
+					</div>
+					
+					<div class="grid grid-cols-2 gap-4 text-sm text-gray-500 mb-6">
+						<div>
+							<p class="font-semibold text-gray-700">Applied On</p>
+							<p>{ app.AppliedAt.Format("Jan 02, 2006") }</p>
+						</div>
+						if app.Source != nil {
+							<div>
+								<p class="font-semibold text-gray-700">Source</p>
+								<p>{ *app.Source }</p>
+							</div>
+						}
+					</div>
+
+					if app.Notes != nil {
+						<div class="mb-6">
+							<p class="font-semibold text-gray-700 mb-2">Notes</p>
+							<p class="text-gray-600 italic whitespace-pre-wrap">{ *app.Notes }</p>
+						</div>
+					}
+				</div>
+
+				<div>
+					<h3 class="text-2xl font-bold mb-4">Interview Timeline</h3>
+					<div id="interview-timeline" class="space-y-4">
+						for _, interview := range app.Interviews {
+							@InterviewItem(interview)
+						}
+					</div>
+				</div>
+			</div>
+
+			<div class="lg:col-span-1">
+				<div class="bg-white p-6 rounded-lg shadow-md sticky top-6">
+					<h3 class="text-xl font-bold mb-4">Add Interview Stage</h3>
+					@AddInterviewForm(app.ID)
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ InterviewItem(i db.Interview) {
+	<div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+		<div class="flex justify-between items-center mb-2">
+			<h4 class="font-bold text-lg">{ i.StageName }</h4>
+			<span class="text-sm text-gray-500">{ i.ScheduledAt.Format("Jan 02, 2006 at 15:04") }</span>
+		</div>
+		if i.Notes != nil {
+			<p class="text-gray-600 text-sm mb-2">{ *i.Notes }</p>
+		}
+		if i.Feedback != nil {
+			<div class="mt-2 p-2 bg-gray-50 rounded text-sm italic">
+				<strong>Feedback:</strong> { *i.Feedback }
+			</div>
+		}
+	</div>
+}
+
+templ AddInterviewForm(appID uuid.UUID) {
+	<form hx-post={ string(templ.URL(fmt.Sprintf("/applications/%s/interviews", appID))) } hx-target="#interview-timeline" hx-swap="beforeend" hx-on::after-request="this.reset()">
+		<div class="mb-4">
+			<label class="block text-gray-700 text-sm font-bold mb-2">Stage Name</label>
+			<input type="text" name="stage_name" placeholder="e.g. Technical Round 1" class="w-full p-2 border rounded" required/>
+		</div>
+		<div class="mb-4">
+			<label class="block text-gray-700 text-sm font-bold mb-2">Scheduled At</label>
+			<input type="datetime-local" name="scheduled_at" class="w-full p-2 border rounded" required/>
+		</div>
+		<div class="mb-4">
+			<label class="block text-gray-700 text-sm font-bold mb-2">Notes</label>
+			<textarea name="notes" class="w-full p-2 border rounded" rows="3"></textarea>
+		</div>
+		<button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">
+			Add to Timeline
+		</button>
+	</form>
+}
