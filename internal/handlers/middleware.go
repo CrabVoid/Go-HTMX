@@ -4,12 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"internship-manager/internal/auth"
+
 	"github.com/google/uuid"
 )
-
-type contextKey string
-
-const userIDKey contextKey = "userID"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,15 +23,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userIDKey, userID)
+		ctx := context.WithValue(r.Context(), auth.UserIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-func GetUserID(ctx context.Context) uuid.UUID {
-	userID, ok := ctx.Value(userIDKey).(uuid.UUID)
-	if !ok {
-		return uuid.Nil
-	}
-	return userID
 }

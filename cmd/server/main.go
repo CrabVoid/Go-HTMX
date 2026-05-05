@@ -43,6 +43,7 @@ func main() {
 	companyHandler := handlers.NewCompanyHandler(queries)
 	positionHandler := handlers.NewPositionHandler(queries)
 	applicationHandler := handlers.NewApplicationHandler(queries)
+	dashboardHandler := handlers.NewDashboardHandler(queries)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -70,6 +71,8 @@ func main() {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		})
+		r.Get("/dashboard/counts", dashboardHandler.GetCounts)
+		r.Get("/dashboard/pipeline", dashboardHandler.GetPipeline)
 		r.Get("/companies", companyHandler.ListCompanies)
 		r.Post("/companies", companyHandler.CreateCompany)
 		r.Get("/companies/{id}/edit", companyHandler.GetCompanyForm)

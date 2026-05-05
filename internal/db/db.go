@@ -338,3 +338,43 @@ func (q *Queries) UpdatePosition(ctx context.Context, arg UpdatePositionParams) 
 	err := row.Scan(&i.ID, &i.CompanyID, &i.UserID, &i.Title, &i.Location, &i.WorkMode, &i.SalaryRange, &i.PostURL, &i.CreatedAt)
 	return i, err
 }
+
+func (q *Queries) GetDashboardStats(ctx context.Context, userID uuid.UUID) (DashboardStats, error) {
+	var stats DashboardStats
+	stats.StatusBreakdown = make(map[string]int)
+
+	// Total Apps
+	err := q.db.QueryRow(ctx, "SELECT COUNT(*) FROM applications WHERE user_id = $1", userID).Scan(&stats.TotalApplications)
+	if err != nil {
+		return stats, err
+	}
+
+	// Interviewing
+	err = q.db.QueryRow(ctx, "SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = 'Interviewing'", userID).Scan(&stats.InterviewingCount)
+	if err != nil {
+		return stats, err
+	}
+
+	// Offers
+	err = q.db.QueryRow(ctx, "SELECT COUNT(*) FROM applications WHERE user_id = $1 AND status = 'Offer'", userID).Scan(&stats.OfferCount)
+	if err != nil {
+		return stats, err
+	}
+
+	// Status Breakdown
+	rows, err := q.db.Query(ctx, "SELECT status, COUNT(*) FROM applications WHERE user_id = $1 GROUP BY status", userID)
+	if err != nil {
+		return stats, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var status string
+		var count int
+		if err := rows.Scan(&status, &count); err != nil {
+			return stats, err
+		}
+		stats.StatusBreakdown[status] = count
+	}
+
+	return stats, nil
+}

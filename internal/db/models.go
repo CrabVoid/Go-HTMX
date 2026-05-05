@@ -85,3 +85,10 @@ type ApplicationWithDetails struct {
 	CompanyID     uuid.UUID
 	Interviews    []Interview
 }
+
+type DashboardStats struct {
+	TotalApplications int
+	InterviewingCount int
+	OfferCount        int
+	StatusBreakdown   map[string]int
+}

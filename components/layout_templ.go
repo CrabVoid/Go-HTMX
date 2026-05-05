@@ -8,6 +8,8 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "internship-manager/internal/handlers"
+
 func Layout(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -36,13 +38,28 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 9, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 11, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Internship Manager</title><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><link rel=\"stylesheet\" href=\"/static/css/styles.css\"></head><body class=\"bg-gray-100 font-sans\"><nav class=\"bg-blue-600 text-white p-4 shadow-md\"><div class=\"container mx-auto flex justify-between items-center\"><h1 class=\"text-xl font-bold\">Internship Manager</h1><div class=\"space-x-4 flex items-center\"><a href=\"/\" class=\"hover:underline\">Dashboard</a> <a href=\"/companies\" class=\"hover:underline\">Companies</a> <a href=\"/positions\" class=\"hover:underline\">Positions</a><form action=\"/logout\" method=\"POST\" class=\"inline\"><button type=\"submit\" class=\"bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold\">Logout</button></form></div></div></nav><main class=\"container mx-auto p-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Internship Manager</title><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\" rel=\"stylesheet\"></head><body class=\"bg-slate-50\"><nav class=\"bg-white border-b border-slate-200 py-4 mb-8 sticky top-0 z-50\"><div class=\"container mx-auto px-4 flex justify-between items-center\"><div class=\"flex items-center gap-8\"><h1 class=\"text-xl font-bold text-indigo-600 tracking-tight\">InternshipMgr</h1><div class=\"hidden md:flex gap-6\"><a href=\"/\" class=\"text-slate-600 hover:text-indigo-600 font-medium transition-colors\">Dashboard</a> <a href=\"/companies\" class=\"text-slate-600 hover:text-indigo-600 font-medium transition-colors\">Companies</a> <a href=\"/positions\" class=\"text-slate-600 hover:text-indigo-600 font-medium transition-colors\">Positions</a></div></div><div class=\"flex items-center gap-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if handlers.GetUserID(ctx).String() != "00000000-0000-0000-0000-000000000000" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form hx-post=\"/logout\" hx-target=\"body\" hx-push-url=\"true\"><button type=\"submit\" class=\"text-sm font-semibold text-slate-500 hover:text-red-600 transition-colors\">Logout</button></form>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<a href=\"/login\" class=\"text-sm font-semibold text-indigo-600 hover:text-indigo-700\">Login</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></nav><main class=\"container mx-auto px-4 pb-12\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +67,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</main></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
