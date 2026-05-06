@@ -49,7 +49,7 @@ templ PositionCard(p db.PositionWithDetails) {
 		<div class="flex justify-between items-start mb-2">
 			<div>
 				<h3 class="text-xl font-bold">
-					<a href={ templ.SafeURL("/applications/" + p.ID.String()) } class="hover:underline">{ p.Title }</a>
+					<a href={ templ.SafeURL("/positions/" + p.ID.String()) } class="hover:underline">{ p.Title }</a>
 				</h3>
 				<p class="text-gray-600 font-medium">{ p.CompanyName }</p>
 			</div>

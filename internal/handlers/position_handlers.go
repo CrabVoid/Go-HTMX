@@ -184,6 +184,40 @@ func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request)
 
 /*
 +--------------------------------------------------------------------------------+
+| HANDLER: GET POSITION                                                          |
+| PURPOSE: Renders the detail view for a specific job position.                  |
+| INFO: Fetches position details and associated skills from the database.        |
++--------------------------------------------------------------------------------+
+*/
+func (h *PositionHandler) GetPosition(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		http.Error(w, "Invalid position ID", http.StatusBadRequest)
+		return
+	}
+
+	pos, err := h.Queries.GetPosition(context.Background(), id)
+	if err != nil {
+		http.Error(w, "Position not found", http.StatusNotFound)
+		return
+	}
+
+	// Security: check if position belongs to user
+	if pos.UserID != auth.GetUserID(r.Context()) {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	component := components.PositionDetail(pos)
+	err = component.Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+/*
++--------------------------------------------------------------------------------+
 | HANDLER: DELETE POSITION                                                       |
 | PURPOSE: Removes a job position from the database.                             |
 | INFO: Validates ownership before deletion.                                     |

@@ -148,6 +148,7 @@ func main() {
 		r.Delete("/companies/{id}", companyHandler.DeleteCompany)
 		r.Get("/positions", positionHandler.ListPositions)
 		r.Post("/positions", positionHandler.CreatePosition)
+		r.Get("/positions/{id}", positionHandler.GetPosition)
 		r.Delete("/positions/{id}", positionHandler.DeletePosition)
 		r.Get("/applications", applicationHandler.ListApplications)
 		r.Post("/applications", applicationHandler.CreateApplication)
