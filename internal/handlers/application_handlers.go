@@ -1,5 +1,19 @@
+/*
++--------------------------------------------------------------------------------+
+| PACKAGE DECLARATION                                                            |
+| PURPOSE: Request logic for Job Applications.                                   |
+| INFO: Manages the lifecycle of applications and associated interviews.          |
++--------------------------------------------------------------------------------+
+*/
 package handlers
 
+/*
++--------------------------------------------------------------------------------+
+| EXTERNAL & INTERNAL IMPORTS                                                    |
+| PURPOSE: Import standard library and project dependencies.                     |
+| INFO: Includes time for interview scheduling and Chi for routing.               |
++--------------------------------------------------------------------------------+
+*/
 import (
 	"context"
 	"fmt"
@@ -7,22 +21,44 @@ import (
 	"time"
 
 	"internship-manager/components"
+	"internship-manager/internal/auth"
 	"internship-manager/internal/db"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
+/*
++--------------------------------------------------------------------------------+
+| APPLICATION HANDLER STRUCT                                                     |
+| PURPOSE: State management for application-related logic.                       |
+| INFO: Holds a reference to the database access layer.                           |
++--------------------------------------------------------------------------------+
+*/
 type ApplicationHandler struct {
 	Queries *db.Queries
 }
 
+/*
++--------------------------------------------------------------------------------+
+| CONSTRUCTOR: NEW APPLICATION HANDLER                                           |
+| PURPOSE: Initialize a new ApplicationHandler instance.                         |
+| INFO: Injects the database queries object.                                     |
++--------------------------------------------------------------------------------+
+*/
 func NewApplicationHandler(queries *db.Queries) *ApplicationHandler {
 	return &ApplicationHandler{Queries: queries}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: LIST APPLICATIONS                                                     |
+| PURPOSE: Displays all applications for the current user.                       |
+| INFO: Renders the application list component.                                  |
++--------------------------------------------------------------------------------+
+*/
 func (h *ApplicationHandler) ListApplications(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 	apps, err := h.Queries.ListApplications(context.Background(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -36,6 +72,13 @@ func (h *ApplicationHandler) ListApplications(w http.ResponseWriter, r *http.Req
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: DELETE APPLICATION                                                    |
+| PURPOSE: Removes an application from the database.                             |
+| INFO: Validates ownership before deletion.                                     |
++--------------------------------------------------------------------------------+
+*/
 func (h *ApplicationHandler) DeleteApplication(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -50,7 +93,7 @@ func (h *ApplicationHandler) DeleteApplication(w http.ResponseWriter, r *http.Re
 		http.Error(w, "Application not found", http.StatusNotFound)
 		return
 	}
-	if app.UserID != GetUserID(r.Context()) {
+	if app.UserID != auth.GetUserID(r.Context()) {
 		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
@@ -64,6 +107,13 @@ func (h *ApplicationHandler) DeleteApplication(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: CREATE APPLICATION                                                    |
+| PURPOSE: Creates a new application for a specific position.                   |
+| INFO: Defaults status to 'Applied' and redirects to detail view.               |
++--------------------------------------------------------------------------------+
+*/
 func (h *ApplicationHandler) CreateApplication(w http.ResponseWriter, r *http.Request) {
 	positionIDStr := r.URL.Query().Get("position_id")
 	if positionIDStr == "" {
@@ -77,7 +127,7 @@ func (h *ApplicationHandler) CreateApplication(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 	app, err := h.Queries.CreateApplication(context.Background(), db.CreateApplicationParams{
 		PositionID: positionID,
 		UserID:     userID,
@@ -92,6 +142,13 @@ func (h *ApplicationHandler) CreateApplication(w http.ResponseWriter, r *http.Re
 	http.Redirect(w, r, fmt.Sprintf("/applications/%s", app.ID.String()), http.StatusSeeOther)
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: GET APPLICATION                                                       |
+| PURPOSE: Renders the detail view for a specific application.                   |
+| INFO: Includes position info, status history, and interviews.                  |
++--------------------------------------------------------------------------------+
+*/
 func (h *ApplicationHandler) GetApplication(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -106,7 +163,7 @@ func (h *ApplicationHandler) GetApplication(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if app.UserID != GetUserID(r.Context()) {
+	if app.UserID != auth.GetUserID(r.Context()) {
 		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
@@ -118,7 +175,13 @@ func (h *ApplicationHandler) GetApplication(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: CREATE INTERVIEW                                                      |
+| PURPOSE: Schedules a new interview for an application.                         |
+| INFO: Parses scheduled time and optional notes.                                |
++--------------------------------------------------------------------------------+
+*/
 func (h *ApplicationHandler) CreateInterview(w http.ResponseWriter, r *http.Request) {
 	appIDStr := chi.URLParam(r, "id")
 	appID, err := uuid.Parse(appIDStr)

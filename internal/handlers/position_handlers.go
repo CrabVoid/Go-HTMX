@@ -1,27 +1,63 @@
+/*
++--------------------------------------------------------------------------------+
+| PACKAGE DECLARATION                                                            |
+| PURPOSE: Request logic for Job Positions.                                      |
+| INFO: Handles listing, creating, and deleting available internship roles.       |
++--------------------------------------------------------------------------------+
+*/
 package handlers
 
+/*
++--------------------------------------------------------------------------------+
+| EXTERNAL & INTERNAL IMPORTS                                                    |
+| PURPOSE: Import standard library and project dependencies.                     |
+| INFO: Includes Chi for routing and UUID for entity management.                 |
++--------------------------------------------------------------------------------+
+*/
 import (
 	"context"
 	"net/http"
 
 	"internship-manager/components"
+	"internship-manager/internal/auth"
 	"internship-manager/internal/db"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
+/*
++--------------------------------------------------------------------------------+
+| POSITION HANDLER STRUCT                                                        |
+| PURPOSE: State management for position-related logic.                          |
+| INFO: Holds a reference to the database access layer.                           |
++--------------------------------------------------------------------------------+
+*/
 type PositionHandler struct {
 	Queries *db.Queries
 }
 
+/*
++--------------------------------------------------------------------------------+
+| CONSTRUCTOR: NEW POSITION HANDLER                                              |
+| PURPOSE: Initialize a new PositionHandler instance.                            |
+| INFO: Injects the database queries object.                                     |
++--------------------------------------------------------------------------------+
+*/
 func NewPositionHandler(queries *db.Queries) *PositionHandler {
 	return &PositionHandler{Queries: queries}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: LIST POSITIONS                                                        |
+| PURPOSE: Displays available internship positions.                              |
+| INFO: Supports skill filtering and partial HTMX grid updates.                  |
++--------------------------------------------------------------------------------+
+*/
 func (h *PositionHandler) ListPositions(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 	
 	positions, err := h.Queries.ListPositions(ctx, userID)
 	if err != nil {
@@ -75,6 +111,13 @@ func (h *PositionHandler) ListPositions(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: CREATE POSITION                                                       |
+| PURPOSE: Processes the creation of a new job position.                         |
+| INFO: Links the position to a company and the current user.                    |
++--------------------------------------------------------------------------------+
+*/
 func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -95,7 +138,7 @@ func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 
 	var locationPtr *string
 	if location != "" {
@@ -139,6 +182,13 @@ func (h *PositionHandler) CreatePosition(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: DELETE POSITION                                                       |
+| PURPOSE: Removes a job position from the database.                             |
+| INFO: Validates ownership before deletion.                                     |
++--------------------------------------------------------------------------------+
+*/
 func (h *PositionHandler) DeletePosition(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -153,7 +203,7 @@ func (h *PositionHandler) DeletePosition(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Position not found", http.StatusNotFound)
 		return
 	}
-	if pos.UserID != GetUserID(r.Context()) {
+	if pos.UserID != auth.GetUserID(r.Context()) {
 		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}

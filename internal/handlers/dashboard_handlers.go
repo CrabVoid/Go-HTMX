@@ -15,10 +15,10 @@ package handlers
 +--------------------------------------------------------------------------------+
 */
 import (
-	"context"
 	"net/http"
 
 	"internship-manager/components"
+	"internship-manager/internal/auth"
 	"internship-manager/internal/db"
 )
 
@@ -52,7 +52,7 @@ func NewDashboardHandler(queries *db.Queries) *DashboardHandler {
 +--------------------------------------------------------------------------------+
 */
 func (h *DashboardHandler) GetCounts(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 	stats, err := h.Queries.GetDashboardStats(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,7 +71,7 @@ func (h *DashboardHandler) GetCounts(w http.ResponseWriter, r *http.Request) {
 +--------------------------------------------------------------------------------+
 */
 func (h *DashboardHandler) GetPipeline(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserID(r.Context())
+	userID := auth.GetUserID(r.Context())
 	stats, err := h.Queries.GetDashboardStats(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

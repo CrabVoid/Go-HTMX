@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "internship-manager/internal/handlers"
+import "internship-manager/internal/auth"
 
 func Layout(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -48,7 +48,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if handlers.GetUserID(ctx).String() != "00000000-0000-0000-0000-000000000000" {
+		if auth.GetUserID(ctx).String() != "00000000-0000-0000-0000-000000000000" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form hx-post=\"/logout\" hx-target=\"body\" hx-push-url=\"true\"><button type=\"submit\" class=\"text-sm font-semibold text-slate-500 hover:text-red-600 transition-colors\">Logout</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
