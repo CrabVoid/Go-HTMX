@@ -1,5 +1,19 @@
+/*
++--------------------------------------------------------------------------------+
+| PACKAGE DECLARATION                                                            |
+| PURPOSE: CRUD operations for Company entities.                                 |
+| INFO: Handles listing, creating, updating, and deleting companies.             |
++--------------------------------------------------------------------------------+
+*/
 package handlers
 
+/*
++--------------------------------------------------------------------------------+
+| EXTERNAL & INTERNAL IMPORTS                                                    |
+| PURPOSE: Import standard library and third-party dependencies.                 |
+| INFO: Includes Chi for URL params and UUID for entity identification.         |
++--------------------------------------------------------------------------------+
+*/
 import (
 	"context"
 	"net/http"
@@ -11,14 +25,35 @@ import (
 	"github.com/google/uuid"
 )
 
+/*
++--------------------------------------------------------------------------------+
+| COMPANY HANDLER STRUCT                                                         |
+| PURPOSE: State management for company-related operations.                      |
+| INFO: Holds a reference to the database queries object.                         |
++--------------------------------------------------------------------------------+
+*/
 type CompanyHandler struct {
 	Queries *db.Queries
 }
 
+/*
++--------------------------------------------------------------------------------+
+| CONSTRUCTOR: NEW COMPANY HANDLER                                               |
+| PURPOSE: Initialize a new CompanyHandler instance.                              |
+| INFO: Connects the handler to the data access layer.                           |
++--------------------------------------------------------------------------------+
+*/
 func NewCompanyHandler(queries *db.Queries) *CompanyHandler {
 	return &CompanyHandler{Queries: queries}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: LIST COMPANIES                                                        |
+| PURPOSE: Fetches and displays all companies.                                   |
+| INFO: Renders the company list component.                                      |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) ListCompanies(w http.ResponseWriter, r *http.Request) {
 	companies, err := h.Queries.ListCompanies(context.Background())
 	if err != nil {
@@ -34,6 +69,13 @@ func (h *CompanyHandler) ListCompanies(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: CREATE COMPANY                                                        |
+| PURPOSE: Processes the creation of a new company.                              |
+| INFO: Accepts form data and returns the newly created company card.            |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -73,6 +115,13 @@ func (h *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: GET COMPANY FORM                                                      |
+| PURPOSE: Renders the edit form for a specific company.                         |
+| INFO: Fetches company data by UUID and returns the form component.             |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) GetCompanyForm(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -94,6 +143,13 @@ func (h *CompanyHandler) GetCompanyForm(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: GET COMPANY CARD                                                      |
+| PURPOSE: Renders a single company card.                                        |
+| INFO: Used for HTMX updates to refresh specific entries in the list.           |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) GetCompanyCard(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -115,6 +171,13 @@ func (h *CompanyHandler) GetCompanyCard(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: UPDATE COMPANY                                                        |
+| PURPOSE: Processes updates to an existing company record.                       |
+| INFO: Validates the UUID and updates the database record.                      |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -160,6 +223,13 @@ func (h *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
++--------------------------------------------------------------------------------+
+| HANDLER: DELETE COMPANY                                                        |
+| PURPOSE: Removes a company record from the database.                           |
+| INFO: Deletes the record by UUID and returns a 200 OK status.                  |
++--------------------------------------------------------------------------------+
+*/
 func (h *CompanyHandler) DeleteCompany(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
